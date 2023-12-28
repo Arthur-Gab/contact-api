@@ -53,7 +53,7 @@ builder.mutationField('createContact', (t) =>
 				return contact;
 			} catch (e) {
 				if (e instanceof Prisma.PrismaClientKnownRequestError) {
-					console.log(e.code);
+					console.log(`Prisma Code: ${e.code}`);
 
 					if (e.code === 'P2002') {
 						throw new ZodError([
@@ -103,7 +103,7 @@ builder.mutationField('updateContactById', (t) =>
 				return updatedContact;
 			} catch (e) {
 				if (e instanceof Prisma.PrismaClientKnownRequestError) {
-					console.log(e.code);
+					console.log(`Prisma Code: ${e.code}`);
 
 					if (e.code === 'P2025') {
 						throw new ZodError([
@@ -123,6 +123,53 @@ builder.mutationField('updateContactById', (t) =>
 	})
 );
 
+builder.mutationField('deleteContactByIdOrEmail', (t) =>
+	t.prismaField({
+		type: 'Contact',
+		nullable: true,
+		errors: {},
+		args: {
+			input: t.arg({
+				type: ContactIdentity,
+				required: true,
+			}),
+		},
+		resolve: async (query, root, { input }) => {
+			console.dir(input);
+
+			try {
+				const updatedContact = await prisma.contact.delete({
+					...query,
+					where: {
+						id: input.id,
+						email: input.email,
+					},
+				});
+
+				return updatedContact;
+			} catch (e) {
+				if (e instanceof Prisma.PrismaClientKnownRequestError) {
+					console.log(`Prisma Code: ${e.code}`);
+
+					if (e.code === 'P2025') {
+						throw new ZodError([
+							{
+								code: 'unrecognized_keys',
+								keys: [`${input.id}`, `${input.email}`],
+								path: ['updateContactById'],
+								message: `The provided Input: { ${input?.id}, ${input?.email} } does not exist on record!`,
+							},
+						]);
+					}
+				}
+
+				console.log(`Generic Error: ${e}`);
+				throw new GraphQLError(`${e}`);
+			}
+		},
+	})
+);
+
 // type Contact {}
 builder.prismaObject('Contact', {
 	description: `Contact model with unique IDs (id), covering: name, email and telephone. Guarantees email exclusivity, increasing data reliability.`,
@@ -131,6 +178,27 @@ builder.prismaObject('Contact', {
 		name: t.exposeString('name'),
 		email: t.exposeString('email'),
 		phone: t.exposeString('phone'),
+	}),
+});
+
+export const ContactIdentity = builder.inputRef<{
+	id: number;
+	email: string;
+}>('ContactIdentity');
+
+ContactIdentity.implement({
+	description:
+		'The ContactIdentity is used for query Contacts with his unique constraints',
+	fields: (t) => ({
+		id: t.int(),
+		email: t.string({
+			validate: {
+				email: [
+					true,
+					{ message: 'Validation fail. Insert a valid a email' },
+				],
+			},
+		}),
 	}),
 });
 

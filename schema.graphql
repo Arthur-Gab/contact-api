@@ -8,6 +8,14 @@ type Contact {
   phone: String!
 }
 
+"""
+The ContactIdentity is used for query Contacts with his unique constraints
+"""
+input ContactIdentity {
+  email: String
+  id: Int
+}
+
 input ContactInput {
   email: String
   name: String
@@ -20,12 +28,19 @@ interface Error {
 
 type Mutation {
   createContact(input: ContactInput!): MutationCreateContactResult
+  deleteContactByIdOrEmail(input: ContactIdentity!): MutationDeleteContactByIdOrEmailResult
   updateContactById(id: Int!, input: ContactInput!): MutationUpdateContactByIdResult
 }
 
 union MutationCreateContactResult = MutationCreateContactSuccess | ZodError
 
 type MutationCreateContactSuccess {
+  data: Contact!
+}
+
+union MutationDeleteContactByIdOrEmailResult = MutationDeleteContactByIdOrEmailSuccess | ZodError
+
+type MutationDeleteContactByIdOrEmailSuccess {
   data: Contact!
 }
 
