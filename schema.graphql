@@ -1,0 +1,50 @@
+"""
+Contact model with unique IDs (id), covering: name, email and telephone. Guarantees email exclusivity, increasing data reliability.
+"""
+type Contact {
+  email: String!
+  id: ID!
+  name: String!
+  phone: String!
+}
+
+input ContactInput {
+  email: String
+  name: String
+  phone: String
+}
+
+interface Error {
+  message: String!
+}
+
+type Mutation {
+  createContact(input: ContactInput!): MutationCreateContactResult
+  updateContactById(id: Int!, input: ContactInput!): MutationUpdateContactByIdResult
+}
+
+union MutationCreateContactResult = MutationCreateContactSuccess | ZodError
+
+type MutationCreateContactSuccess {
+  data: Contact!
+}
+
+union MutationUpdateContactByIdResult = MutationUpdateContactByIdSuccess | ZodError
+
+type MutationUpdateContactByIdSuccess {
+  data: Contact!
+}
+
+type Query {
+  getAllContacts: [Contact]!
+}
+
+type ZodError implements Error {
+  fieldErrors: [ZodFieldError!]!
+  message: String!
+}
+
+type ZodFieldError {
+  message: String!
+  path: [String!]!
+}

@@ -1,0 +1,33 @@
+{
+  "name": "contact",
+  "module": "index.ts",
+  "type": "module",
+  "scripts": {
+    "dev": "bun --watch run src/index.ts",
+    "codegen": "graphql-codegen -c codegen.ts",
+    "seed": "bunx prisma db seed"
+  },
+  "prisma": {
+    "seed": "bun ./prisma/seed.ts"
+  },
+  "devDependencies": {
+    "@graphql-codegen/cli": "^5.0.0",
+    "@graphql-codegen/schema-ast": "^4.0.0",
+    "bun-types": "latest",
+    "prisma": "^5.7.1",
+    "typescript": "^5.3.3"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "@pothos/core": "^3.41.0",
+    "@pothos/plugin-errors": "^3.11.1",
+    "@pothos/plugin-prisma": "^3.63.0",
+    "@pothos/plugin-validation": "^3.10.1",
+    "@prisma/client": "5.7.1",
+    "graphql": "^16.8.1",
+    "graphql-yoga": "^5.1.0",
+    "zod": "^3.22.4"
+  }
+}
